@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MudletPackage>
+<MudletPackage version="1.0">
+    <TriggerPackage/>
+    <TimerPackage/>
+    <AliasPackage>
+        <Alias isActive="yes" isFolder="no">
+            <name>Gare To</name>
+            <script>-- GARETO ALIAS
+
+local where = matches[2]
+
+gareTo.go(where)
+
+
+</script>
+            <command></command>
+            <packageName></packageName>
+            <regex>^gareto (.+)$</regex>
+        </Alias>
+    </AliasPackage>
+    <ActionPackage/>
+    <ScriptPackage>
+        <Script isActive="yes" isFolder="no">
+            <name>Gare To</name>
+            <packageName></packageName>
+            <script>-- GARETO SCRIPTS
+-- v 1.0
+
+gareTo						= gareTo or {}		-- set up namespace
+
+gareTo.version			= 1
+
+gareTo.go = function(where)					-- perform action
+
+-- need to build in functionality to check route from first room of Gare - 12695 - to end point to check before entering Gare
+
+	if not gmcp.Char.Status.race:find(&quot;Dragon&quot;) then
+
+		cecho(&quot;\n&lt;red&gt;.xX&lt;white&gt; Not dragonformed &lt;red&gt;Xx.&lt;reset&gt;\n&quot;)
+
+	elseif gmcp.Room.Info.area == &quot;the Parthren Gare&quot; then --already in Gare, no need to pierce
+
+		expandAlias(&quot;goto &quot;..where)
+
+	else
+
+		if gmcp.Char.Status.name == &quot;Klendathu&quot; then
+			qPpd(&quot;eqbal&quot;,&quot;tell aristeas come here&quot;..kln.cc..&quot;pierce the veil&quot;)
+		else		
+			send(&quot;queue add eqbal pierce the veil&quot;,false)
+		end
+
+		gareToTrigger = tempTrigger(&quot;you successfully pierce the Veil&quot;, [[ expandAlias(&quot;goto ]]..where..[[&quot;) gareTo.cleanGareTo() ]] )
+
+		gareToFail1 = tempTrigger(&quot;You are unable to pierce the veil from here.&quot;, [[ gareTo.cleanGareTo() ]] )
+		gareToFail2 = tempTrigger(&quot;You can only Pierce the Veil from the prime material plane.&quot;, [[ gareTo.cleanGareTo() ]] )
+		
+		gareToTimer = tempTimer(5, [[ gareTo.cleanGareTo() ]] )
+
+	end
+
+end
+
+
+gareTo.cleanGareTo = function()				-- clean up
+
+	if gareToTrigger then killTrigger(gareToTrigger) gareToTrigger = nil end
+
+	if gareToFail1 then killTrigger(gareToFail1) gareToFail1 = nil end
+
+	if gareToFail2 then killTrigger(gareToFail2) gareToFail2 = nil end
+
+	if gareToTimer then killTimer(gareToTimer) gareToTimer = nil end
+
+end
+
+</script>
+            <eventHandlerList/>
+        </Script>
+    </ScriptPackage>
+    <KeyPackage/>
+</MudletPackage>
